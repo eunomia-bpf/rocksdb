@@ -35,7 +35,7 @@
 
 // This line ensures that gtest.h can be compiled on its own, even
 // when it's fused.
-#include "gtest/gtest.h"
+#include "gtest.h"
 
 // The following lines pull in the real gtest *.cc files.
 // Copyright 2005, Google Inc.
@@ -6727,7 +6727,7 @@ bool ShouldShard(const char* total_shards_env,
       << "Invalid environment variables: you have "
       << kTestShardIndex << " = " << shard_index
       << ", but have left " << kTestTotalShards << " unset.\n";
-    ColoredPrintf(COLOR_RED, msg.GetString().c_str());
+    ColoredPrintf(COLOR_RED, msg.GetString().c_str()); 
     fflush(stdout);
     exit(EXIT_FAILURE);
   } else if (total_shards != -1 && shard_index == -1) {
@@ -8676,7 +8676,7 @@ static void StackLowerThanAddress(const void* ptr, bool* result) {
 // Make sure AddressSanitizer does not tamper with the stack here.
 GTEST_ATTRIBUTE_NO_SANITIZE_ADDRESS_
 static bool StackGrowsDown() {
-  int dummy;
+  int dummy=0;
   bool result;
   StackLowerThanAddress(&dummy, &result);
   return result;
