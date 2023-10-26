@@ -64,7 +64,7 @@ struct uring_queue{
   uint16_t id;
   std::vector<int> fds;
 };
-enum uring_type;
+enum uring_type; // TODO (victoryang00): for compaction to get notification from kernel.
 class Urings{
   public:
     Urings()
