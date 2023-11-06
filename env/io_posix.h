@@ -12,6 +12,9 @@
 #include <liburing.h>
 #include <sys/uio.h>
 #endif
+#if defined(ROCKSDB_BPF_PRESENT)
+#include <bpf/libbpf.h>
+#endif
 #include <unistd.h>
 
 #include <atomic>

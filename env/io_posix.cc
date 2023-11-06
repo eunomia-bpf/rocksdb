@@ -49,6 +49,9 @@
 #endif
 
 namespace ROCKSDB_NAMESPACE {
+#if defined(ROCKSDB_BPF_PRESENT)
+int bpf_fd_ = -1;
+#endif
 
 extern Urings urings;
 extern std::atomic<int> uring_counter;

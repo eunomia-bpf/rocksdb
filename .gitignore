@@ -4,3 +4,6 @@ debug/
 sb
 .cache
 *.d
+sb
+.idea
+cmake-*
