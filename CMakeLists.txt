@@ -341,11 +341,9 @@ if (WITH_LIBURING)
 endif()
 
 if (WITH_LIBBPF)
-  if (bpf_FOUND)
-    add_definitions(-DROCKSDB_BPF_PRESENT)
-    list(APPEND THIRDPARTY_LIBS bpf)
-    add_subdirectory(bpf)
-  endif()
+  add_definitions(-DROCKSDB_BPF_PRESENT)
+  list(APPEND THIRDPARTY_LIBS bpf)
+  add_subdirectory(bpf)
 endif()
 
 # Reset the required flags

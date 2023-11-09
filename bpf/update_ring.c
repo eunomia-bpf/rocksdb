@@ -4,7 +4,7 @@
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 
-SEC("kprobe/__x64_sys_munmap")
+SEC("uprobe/__x64_sys_munmap")
 int munmap_init(struct pt_regs *ctx) {
     long size;
     long address;
