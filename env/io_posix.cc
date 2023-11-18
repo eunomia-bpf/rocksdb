@@ -49,9 +49,6 @@
 #endif
 
 namespace ROCKSDB_NAMESPACE {
-#if defined(ROCKSDB_BPF_PRESENT)
-int bpf_fd_ = -1;
-#endif
 
 extern Urings urings;
 extern std::atomic<int> uring_counter;
@@ -59,6 +56,7 @@ extern std::atomic<int> uring_counter;
 //zl: Add some functions 
 bool Urings::init_queues(uint16_t compaction_num, uint8_t log_num, uint16_t compaction_depth, uint8_t log_depth)
 {
+    uring_counter.fetch_add(1);
   int init_lib = true;
   this->compaction_queue_size = compaction_num;
   this->log_queue_size = log_num;
@@ -1680,7 +1678,7 @@ IOStatus PosixWritableFile::ASync(const IOOptions& /*opts*/,
     printf("No more sqe available for fsync !\n");
   }
 
-  // Lei Todo: this place should act like fdatasync, which means having flag IORING_FSYNC_DATASYNC.
+  // Lei Todo: this place should act like fdatasync, which means having flag IORING_FSYNC_DATASYNC. BLOCKED
   io_uring_prep_fsync(sqe, fd_, IORING_FSYNC_DATASYNC);
   // Set data can transmit datas
   //io_uring_sqe_set_data(sqe, (void*) uq);
@@ -1713,7 +1711,7 @@ IOStatus PosixWritableFile::AFsync(const IOOptions& /*opts*/,
     printf("No more sqe available for fsync !\n");
   }
 
-  // Lei Todo: this place should act like fsync, which means no flag IORING_FSYNC_DATASYNC.
+  // Lei Todo: this place should act like fsync, which means no flag IORING_FSYNC_DATASYNC. BLOCKED
   io_uring_prep_fsync(sqe, fd_, IORING_FSYNC_DATASYNC);
   // Set data can transmit datas
   //io_uring_sqe_set_data(sqe, (void*) uq);

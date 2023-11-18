@@ -4,6 +4,8 @@ debug/
 sb
 .cache
 *.d
-sb
 .idea
 cmake-*
+.output/
+uring_bpftime
+cmake-build-debug

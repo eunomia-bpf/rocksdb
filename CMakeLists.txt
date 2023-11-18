@@ -77,6 +77,23 @@ if (WITH_WINDOWS_UTF8_FILENAMES)
 endif()
 option(ROCKSDB_BUILD_SHARED "Build shared versions of the RocksDB libraries" ON)
 
+if (WITH_LIBBPF)
+  add_definitions(-DROCKSDB_BPF_PRESENT)
+  list(APPEND THIRDPARTY_LIBS bpf elf z)
+  include(ExternalProject)
+  ExternalProject_Add(uring_bpftime
+          PREFIX uring_bpftime
+          SOURCE_DIR ${CMAKE_SOURCE_DIR}/bpf
+          CONFIGURE_COMMAND ""
+          BUILD_COMMAND "make" "CFLAGS=-g -O2 -Werror -Wall" "-j"
+          BUILD_IN_SOURCE TRUE
+          INSTALL_COMMAND "cp" "${CMAKE_SOURCE_DIR}/bpf/.output/*" "${CMAKE_BINARY_DIR}/bpf"
+          STEP_TARGETS build
+          BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/bpf
+  )
+  include_directories(${CMAKE_BINARY_DIR})
+endif()
+
 if ($ENV{CIRCLECI})
   message(STATUS "Build for CircieCI env, a few tests may be disabled")
   add_definitions(-DCIRCLECI)
@@ -338,12 +355,6 @@ if (WITH_LIBURING)
     add_definitions(-DROCKSDB_IOURING_PRESENT)
     list(APPEND THIRDPARTY_LIBS uring::uring)
   endif()
-endif()
-
-if (WITH_LIBBPF)
-  add_definitions(-DROCKSDB_BPF_PRESENT)
-  list(APPEND THIRDPARTY_LIBS bpf)
-  add_subdirectory(bpf)
 endif()
 
 # Reset the required flags

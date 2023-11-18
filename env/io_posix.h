@@ -22,6 +22,7 @@
 #include <map>
 #include <string>
 #include <mutex>
+#include <future>
 
 #include "port/port.h"
 #include "rocksdb/env.h"
@@ -59,7 +60,7 @@ namespace ROCKSDB_NAMESPACE {
 struct uring_queue{
   struct io_uring uring;
   // reserve file number of input sstable
-  std::unordered_set<uint64_t> store_filenumber;
+  std::unordered_set<uint64_t> store_filenumber; // need to maintain the filenumber mapping to nodeid
   std::atomic<bool> running;
   uint8_t sync_count = 0;
   uint8_t ref = 0;
@@ -87,7 +88,6 @@ class Urings{
     bool init_queues(uint16_t compaction_num = 512, uint8_t log_num = 1, uint16_t compaction_depth = 64, uint8_t log_depth = 1);
     bool init = false;
     void clear_all(uring_type queue_type);
-
 
     // not synced. serve for input file of compaction
     std::unordered_set<uint64_t> reserve_input;

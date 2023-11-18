@@ -109,7 +109,9 @@
 #include "utilities/trace/replayer_impl.h"
 
 namespace ROCKSDB_NAMESPACE {
-
+#if defined(ROCKSDB_BPF_PRESENT)
+    extern struct uring_bpftime_bpf* uring_probe;
+#endif
 const std::string kDefaultColumnFamilyName("default");
 const std::string kPersistentStatsColumnFamilyName(
     "___rocksdb_stats_history___");
@@ -4567,7 +4569,9 @@ Status DB::DestroyColumnFamilyHandle(ColumnFamilyHandle* column_family) {
   return Status::OK();
 }
 
-DB::~DB() {}
+DB::~DB() {
+    uring_probe->destroy(uring_probe);
+}
 
 Status DBImpl::Close() {
   InstrumentedMutexLock closing_lock_guard(&closing_mutex_);
