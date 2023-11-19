@@ -107,6 +107,9 @@
 #include "util/stop_watch.h"
 #include "util/string_util.h"
 #include "utilities/trace/replayer_impl.h"
+#if defined(ROCKSDB_BPF_PRESENT)
+#include "bpf/uring_bpftime.skel.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 #if defined(ROCKSDB_BPF_PRESENT)

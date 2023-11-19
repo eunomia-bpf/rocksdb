@@ -100,8 +100,7 @@ class Urings{
 
     std::mutex mtx;
 
-  private: 
-    uint16_t get_id(uint16_t num, uint16_t mask);
+  private:
     struct uring_queue** compaction_urings = nullptr;
     struct uring_queue** log_urings = nullptr;
     uint16_t compaction_queue_size = 0;
@@ -439,7 +438,7 @@ class PosixWritableFile : public FSWritableFile {
   virtual IOStatus Flush(const IOOptions& opts, IODebugContext* dbg) override;
   virtual IOStatus Sync(const IOOptions& opts, IODebugContext* dbg) override;
   virtual IOStatus Fsync(const IOOptions& opts, IODebugContext* dbg) override;
-  // Lei modified: writable file async declare
+  // Lei modified: writable file async declare 这里是异步写的声明 call sqe
   virtual IOStatus ASync(const IOOptions& opts, IODebugContext* dbg, struct uring_queue* uptr) override;
   virtual IOStatus AFsync(const IOOptions& opts, IODebugContext* dbg, struct uring_queue* uptr) override;
   virtual IOStatus AClose(const IOOptions& opts, IODebugContext* dbg) override;

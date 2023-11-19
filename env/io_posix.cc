@@ -47,23 +47,28 @@
 #define F_LINUX_SPECIFIC_BASE 1024
 #define F_SET_RW_HINT (F_LINUX_SPECIFIC_BASE + 12)
 #endif
+#if defined(ROCKSDB_BPF_PRESENT)
+#include "bpf/uring_bpftime.skel.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
 extern Urings urings;
-extern std::atomic<int> uring_counter;
+#if defined(ROCKSDB_BPF_PRESENT)
+    extern struct uring_bpftime_bpf* uring_probe;
+#endif
+std::atomic<int> uring_counter;
 
 //zl: Add some functions 
 bool Urings::init_queues(uint16_t compaction_num, uint8_t log_num, uint16_t compaction_depth, uint8_t log_depth)
 {
-    uring_counter.fetch_add(1);
   int init_lib = true;
   this->compaction_queue_size = compaction_num;
   this->log_queue_size = log_num;
   this->compaction_queue_depth = compaction_depth;
   this->log_queue_depth = log_depth;
   this->compaction_urings = new struct uring_queue* [compaction_num];
-  this->log_urings = new struct uring_queue* [log_num]; 
+  this->log_urings = new struct uring_queue* [log_num];
   for(uint16_t i = 0; i < compaction_num; ++i)
     {
       struct uring_queue* qptr;
@@ -73,6 +78,7 @@ bool Urings::init_queues(uint16_t compaction_num, uint8_t log_num, uint16_t comp
       qptr->sync_count = 0;
       if(io_uring_queue_init(this->compaction_queue_depth, &(qptr->uring), 0) != 0)
       {
+        bpf_map__update_elem(uring_probe->maps.my_pid_map, &i, sizeof(uint64_t), &qptr, sizeof (uint64_t), BPF_ANY);
         init_lib = false;
         break;
       }
@@ -105,6 +111,7 @@ bool Urings::init_queues(uint16_t compaction_num, uint8_t log_num, uint16_t comp
       return false;
     }
     this->init = true;
+    uring_counter.fetch_add(1);
     return true;
 }
 struct uring_queue* Urings::get_empty_element(uint32_t id)
@@ -141,7 +148,7 @@ void Urings::clear_all(uring_type queue_type)
           io_uring_queue_exit(&(this->compaction_urings[i]->uring));
         }
         delete this->compaction_urings;
-        this->compaction_urings = nullptr;
+        memset(this->compaction_urings, 0, sizeof(struct uring_queue*)*this->compaction_queue_size);
         this->compaction_queue_size = 0;
         this->compaction_queue_depth = 0;
         this->init = false;
@@ -174,7 +181,7 @@ struct uring_queue* Urings::wait_for_queue(struct uring_queue* uptr)
     struct io_uring_cqe* cqe;
     for(uint16_t i = 0; i < uptr->sync_count; ++i)
     {
-      int ret = io_uring_wait_cqe(&uptr->uring, &cqe);
+      int ret = io_uring_wait_cqe(&uptr->uring, &cqe); // Hook here to wait for the queue by async fsync for write by bit map.
       if(ret < 0)
       {
         printf("invalid io_uring_wait_cqe\n");
@@ -194,8 +201,6 @@ struct uring_queue* Urings::wait_for_queue(struct uring_queue* uptr)
   if(uptr->fds.empty())
   {
     uptr->running.store(false);
-
-
   }
 
   return uptr;
@@ -1639,6 +1644,7 @@ IOStatus PosixWritableFile::Sync(const IOOptions& /*opts*/,
     return IOError("while fcntl(F_FULLFSYNC)", filename_, errno);
   }
 #else   // HAVE_FULLFSYNC
+   // OK ?
   if (fdatasync(fd_) < 0) {
     return IOError("While fdatasync", filename_, errno);
   }
@@ -1653,6 +1659,7 @@ IOStatus PosixWritableFile::Fsync(const IOOptions& /*opts*/,
     return IOError("while fcntl(F_FULLFSYNC)", filename_, errno);
   }
 #else   // HAVE_FULLFSYNC
+    // OK ?
   if (fsync(fd_) < 0) {
     return IOError("While fsync", filename_, errno);
   }
@@ -1711,7 +1718,7 @@ IOStatus PosixWritableFile::AFsync(const IOOptions& /*opts*/,
     printf("No more sqe available for fsync !\n");
   }
 
-  // Lei Todo: this place should act like fsync, which means no flag IORING_FSYNC_DATASYNC. BLOCKED
+  // Lei Todo: this place should act like fsync, which means no flag IORING_FSYNC_DATASYNC.
   io_uring_prep_fsync(sqe, fd_, IORING_FSYNC_DATASYNC);
   // Set data can transmit datas
   //io_uring_sqe_set_data(sqe, (void*) uq);

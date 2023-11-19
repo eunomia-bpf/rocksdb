@@ -87,7 +87,7 @@ if (WITH_LIBBPF)
           CONFIGURE_COMMAND ""
           BUILD_COMMAND "make" "CFLAGS=-g -O2 -Werror -Wall" "-j"
           BUILD_IN_SOURCE TRUE
-          INSTALL_COMMAND "cp" "${CMAKE_SOURCE_DIR}/bpf/.output/*" "${CMAKE_BINARY_DIR}/bpf"
+          INSTALL_COMMAND "cp" "${CMAKE_SOURCE_DIR}/bpf/.output/uring_bpftime.skel.h" "${CMAKE_BINARY_DIR}/bpf"
           STEP_TARGETS build
           BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/bpf
   )

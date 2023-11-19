@@ -1656,7 +1656,7 @@ Status DB::Open(const Options& options, const std::string& dbname, DB** dbptr) {
   }
 #if defined(ROCKSDB_BPF_PRESENT)
     /* Init probes */
-    uring_probe->open();
+    uring_probe = uring_probe->open();
     if (uring_probe == nullptr) {
         fprintf(stderr, "ERROR: Failed to open probe\n");
         exit(EXIT_FAILURE);
