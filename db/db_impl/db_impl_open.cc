@@ -24,9 +24,6 @@
 #include "rocksdb/wal_filter.h"
 #include "test_util/sync_point.h"
 #include "util/rate_limiter.h"
-#if defined(ROCKSDB_BPF_PRESENT)
-#include "bpf/uring_bpftime.skel.h"
-#endif
 
 #include "env/io_posix.h"
 #include <iostream>
@@ -1654,28 +1651,6 @@ Status DB::Open(const Options& options, const std::string& dbname, DB** dbptr) {
     /* Init all queues */
     urings.init_queues(512,1,128,1);
   }
-#if defined(ROCKSDB_BPF_PRESENT)
-    /* Init probes */
-    uring_probe = uring_probe->open();
-    if (uring_probe == nullptr) {
-        fprintf(stderr, "ERROR: Failed to open probe\n");
-        exit(EXIT_FAILURE);
-    }
-    if (uring_probe->load(uring_probe)){
-        fprintf(stderr, "Failed to attach BPF skeleton\n");
-        /* Clean up */
-        uring_probe->destroy(uring_probe);
-        exit(EXIT_FAILURE);
-    };
-    if (uring_probe->attach(uring_probe)){
-        fprintf(stderr, "Failed to attach BPF skeleton\n");
-        /* Clean up */
-        uring_probe->destroy(uring_probe);
-        exit(EXIT_FAILURE);
-    };
-
-#endif
-
   Status s = DB::Open(db_options, dbname, column_families, &handles, dbptr);
   if (s.ok()) {
     if (db_options.persist_stats_to_disk) {

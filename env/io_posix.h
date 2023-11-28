@@ -99,9 +99,9 @@ class Urings{
     std::map<uint64_t, std::string>  ToBeDeteleted;
 
     std::mutex mtx;
+    struct uring_queue** compaction_urings = nullptr;
 
   private:
-    struct uring_queue** compaction_urings = nullptr;
     struct uring_queue** log_urings = nullptr;
     uint16_t compaction_queue_size = 0;
     uint16_t log_queue_size = 0;

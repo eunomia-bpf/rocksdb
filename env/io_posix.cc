@@ -47,9 +47,6 @@
 #define F_LINUX_SPECIFIC_BASE 1024
 #define F_SET_RW_HINT (F_LINUX_SPECIFIC_BASE + 12)
 #endif
-#if defined(ROCKSDB_BPF_PRESENT)
-#include "bpf/uring_bpftime.skel.h"
-#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -78,7 +75,6 @@ bool Urings::init_queues(uint16_t compaction_num, uint8_t log_num, uint16_t comp
       qptr->sync_count = 0;
       if(io_uring_queue_init(this->compaction_queue_depth, &(qptr->uring), 0) != 0)
       {
-        bpf_map__update_elem(uring_probe->maps.my_pid_map, &i, sizeof(uint64_t), &qptr, sizeof (uint64_t), BPF_ANY);
         init_lib = false;
         break;
       }
@@ -147,7 +143,7 @@ void Urings::clear_all(uring_type queue_type)
           this->compaction_urings[i]->store_filenumber.clear();
           io_uring_queue_exit(&(this->compaction_urings[i]->uring));
         }
-        delete this->compaction_urings;
+        // delete this->compaction_urings;
         memset(this->compaction_urings, 0, sizeof(struct uring_queue*)*this->compaction_queue_size);
         this->compaction_queue_size = 0;
         this->compaction_queue_depth = 0;

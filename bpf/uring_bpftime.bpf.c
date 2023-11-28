@@ -9,6 +9,7 @@ struct uring_check_id{
     uint32_t inode;
     uint32_t hashed_inode;
 };
+
 struct {
     __uint(type, BPF_MAP_TYPE_HASH);
     __type(key, uint64_t); // pid
@@ -109,7 +110,7 @@ int get_fd_inode_hash(io_uring_wait_cqe, int a, int b)
 }
 
 // 找到一个kernel
-// trace点可以把fd的inodemap拿到
+// trace点可以把 fd 的 inodemap拿到
 //SEC("kretprobe:__writeback_single_inode")
 //int check_done_ext_writeback(struct pt_regs *ctx)
 //{

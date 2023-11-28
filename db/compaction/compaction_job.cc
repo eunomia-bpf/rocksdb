@@ -623,6 +623,9 @@ Status CompactionJob::Run() {
 
   const size_t num_threads = compact_->sub_compact_states.size();
   Compaction* compaction; 
+  if(urings.compaction_urings){
+    urings.init_queues(job_id_,num_threads);
+  }
   struct uring_queue* uptr;
   {
     std::lock_guard<std::mutex> lock(urings.mtx);
