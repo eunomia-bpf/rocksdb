@@ -58,16 +58,18 @@ namespace ROCKSDB_NAMESPACE {
 
 // The struct pass to io_uring_set_data.
 struct uring_queue{
+  // make it easy to access for count
+  uint8_t sync_count = 0;
   struct io_uring uring;
   // reserve file number of input sstable
   std::unordered_set<uint64_t> store_filenumber; // need to maintain the filenumber mapping to nodeid
   std::atomic<bool> running;
-  uint8_t sync_count = 0;
   uint8_t ref = 0;
   uint32_t job_id;
   uint16_t id;
   std::vector<int> fds;
 };
+
 enum uring_type; // TODO (victoryang00): for compaction to get notification from kernel.
 class Urings{
   public:

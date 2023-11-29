@@ -48,6 +48,14 @@
 #define F_SET_RW_HINT (F_LINUX_SPECIFIC_BASE + 12)
 #endif
 
+extern "C" __attribute_noinline__  int bpftime_hook_function_for_submit_fd(int fd, bool print)
+{
+  if (print)
+    printf("fd: %d\n", fd);
+	return fd;
+}
+
+
 namespace ROCKSDB_NAMESPACE {
 
 extern Urings urings;
@@ -1017,7 +1025,7 @@ IOStatus PosixRandomAccessFile::ReadAsync(
     assert(IsSectorAligned(req.len, GetRequiredBufferAlignment()));
     assert(IsSectorAligned(req.scratch, GetRequiredBufferAlignment()));
   }
-  
+
 #if defined(ROCKSDB_IOURING_PRESENT)
   // io_uring_queue_init.
   struct io_uring* iu = nullptr;
@@ -1687,6 +1695,8 @@ IOStatus PosixWritableFile::ASync(const IOOptions& /*opts*/,
   //io_uring_sqe_set_data(sqe, (void*) uq);
   struct io_uring_cqe* cqe = nullptr;
 
+  bpftime_hook_function_for_submit_fd(fd_, false);
+
   int ret = io_uring_submit(uq);
   if(ret <= 0)
   {
@@ -1719,6 +1729,8 @@ IOStatus PosixWritableFile::AFsync(const IOOptions& /*opts*/,
   // Set data can transmit datas
   //io_uring_sqe_set_data(sqe, (void*) uq);
   struct io_uring_cqe* cqe = nullptr;
+
+  bpftime_hook_function_for_submit_fd(fd_, false);
 
   int ret = io_uring_submit(uq);
   if(ret <= 0)
