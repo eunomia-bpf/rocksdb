@@ -9,3 +9,5 @@ cmake-*
 .output/
 uring_bpftime
 cmake-build-debug
+*.o
+*.a

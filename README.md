@@ -26,3 +26,8 @@ Welcome to the AisLSM open source project! This project is based on the Linux `i
 1. On GitHub, you'll find different branches. Each branch corresponds to a different variant of AisLSM as mentioned in the paper.
 
 2. It's essential to note that the polling version of the project can only run properly on NVMe drives.
+
+## able to hook
+
+bpftrace -e 'uprobe:/root/zys/bpftime-evaluation/rocksdb/build/librocksdb.so.7:io_uring_submit { printf("PID %d sleeping...\n", pid); }'
+

@@ -1017,7 +1017,7 @@ IOStatus PosixRandomAccessFile::ReadAsync(
     assert(IsSectorAligned(req.len, GetRequiredBufferAlignment()));
     assert(IsSectorAligned(req.scratch, GetRequiredBufferAlignment()));
   }
-
+  
 #if defined(ROCKSDB_IOURING_PRESENT)
   // io_uring_queue_init.
   struct io_uring* iu = nullptr;

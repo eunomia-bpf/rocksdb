@@ -60,6 +60,14 @@ int main() {
   db->Get(ReadOptions(), "key2", &value);
   assert(value == "value");
 
+
+  // if background compaction is not working, write will stall
+  // because of options.level0_stop_writes_trigger
+  for (int i = 1000; i < 999999; ++i) {
+    db->Put(WriteOptions(), std::to_string(i),
+            std::string(500, 'a' + (i % 26)));
+  }
+
   {
     PinnableSlice pinnable_val;
     db->Get(ReadOptions(), db->DefaultColumnFamily(), "key2", &pinnable_val);
